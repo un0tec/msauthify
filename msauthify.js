@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --no-warnings=ExperimentalWarning
 import { readFileSync } from 'fs';
 import os from 'os';
 import pkg from './package.json' with {type: 'json'};
