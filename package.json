@@ -1,0 +1,28 @@
+{
+  "name": "msauthify",
+  "version": "1.0.0",
+  "description": "Automates AWS Oauth2 token fetching",
+  "type": "module",
+  "exports": "./msauthify.js",
+  "bin": {
+    "msauthify": "msauthify.js"
+  },
+  "scripts": {
+    "start": "node msauthify.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "name": "msauthify",
+    "type": "git",
+    "url": "git+https://github.com/un0tec/msauthify.git"
+  },
+  "author": "un0tec",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/un0tec/msauthify/issues"
+  },
+  "homepage": "https://github.com/un0tec/msauthify#readme",
+  "dependencies": {
+    "axios": "1.7.9"
+  }
+}
