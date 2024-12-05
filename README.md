@@ -58,7 +58,7 @@ Windows: `%userprofile%/msauthify.config`
     "tenantId": "your-tenant-id",
     "clientId": "your-client-id",
     "clientSecret": "your-client-secret",
-    "scope": "https://graph.microsoft.com/.default",
+    "scope": "your-scope-app",
     "username": "user@example.com",
     "password": "your-password"
 }
