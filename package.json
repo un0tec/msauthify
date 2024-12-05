@@ -1,6 +1,6 @@
 {
   "name": "msauthify",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Automates AWS Oauth2 token fetching",
   "type": "module",
   "exports": "./msauthify.js",

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { readFileSync } from 'fs';
 import os from 'os';
 import pkg from './package.json' with {type: 'json'};
