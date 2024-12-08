@@ -5,6 +5,8 @@ import pkg from './package.json' with {type: 'json'};
 import { checkUpdate } from './update-notifier.js';
 import axios from 'axios';
 
+const CONFIG_PATH = `${os.homedir()}/msauthify.config`;
+
 const updateAvailable = await checkUpdate({
     author: pkg.author,
     repository: pkg.repository.name,
@@ -21,10 +23,48 @@ init().catch((error) => {
 
 async function init() {
 
-    // config
-    const data = readFileSync(os.homedir() + "/msauthify.config", "utf8");
-    const config = JSON.parse(data);
+    const argv = process.argv.slice(2);
+    const config = loadConfig();
 
+    validateArgs(argv, config);
+
+    let profiles = argv.length > 0
+        ? Object.fromEntries(Object.entries(config).filter(([key]) => argv.includes(key)))
+        : config;
+
+    let results = [];
+    for (let profile in profiles) {
+        const token = await fetchToken(config[profile]);
+        results.push({ name: profile, token: token })
+    }
+
+    if (results.length === 1) {
+        console.log(results[0].token);
+    } else {
+        for (let { name, token } of results) {
+            const tokenMessage = `Token '${name}'`;
+            console.log('-'.repeat(tokenMessage.length));
+            console.log(tokenMessage);
+            console.log('-'.repeat(tokenMessage.length));
+            console.log(token);
+        }
+    }
+
+}
+
+function validateArgs(argv, config) {
+    const invalidProfiles = argv.filter(profile => !config.hasOwnProperty(profile));
+    if (invalidProfiles.length > 0) {
+        throw new Error(`Invalid config: '${invalidProfiles.join(", ")}' not found in ${CONFIG_PATH}`);
+    }
+}
+
+function loadConfig() {
+    const data = readFileSync(CONFIG_PATH, 'utf8');
+    return JSON.parse(data);
+}
+
+async function fetchToken(config) {
     const url = `https://login.microsoftonline.com/${config.tenantId}/oauth2/v2.0/token`;
 
     const payload = new URLSearchParams({
@@ -36,8 +76,5 @@ async function init() {
         grant_type: "password",
     });
 
-    const token = (await axios.post(url, payload.toString())).data.access_token;
-
-    console.log(token);
-
+    return (await axios.post(url, payload.toString())).data.access_token;
 }

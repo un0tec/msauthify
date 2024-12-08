@@ -14,18 +14,19 @@
 
 ## # Description
 
-`msauthify` is a Node.js application for automating OAuth2 authentication with Microsoft services. It retrieves access tokens by leveraging the resource owner password credentials grant flow. This tool simplifies authentication for developers working with Microsoft APIs.
+`msauthify` is a Node.js application for automating OAuth2 authentication with Microsoft services. It retrieves access tokens by leveraging the resource owner password credentials grant flow. This tool simplifies authentication for developers working with Microsoft APIs. Supports multiple applications.
 
 ## # Before Running
 
-Ensure that your AWS SSO profiles are configured using `aws sso configure` and your profiles are configured in a JSON file named `msauthify.config`. The format of the configuration file should include the following details:
+Ensure that your AWS SSO profiles are configured using `aws sso configure` and your profiles are configured in a `JSON` file named `msauthify.config`. The format of the configuration file should include the following details:
 
-- `tenantId`: The Microsoft Azure tenant ID.
-- `clientId`: The application (client) ID from Azure.
-- `clientSecret`: The client secret for the application.
-- `scope`: The API scopes requested.
-- `username`: The username of the account for authentication.
-- `password`: The password of the account for authentication.
+- `custom_application_name`: Custom application name.
+  - `tenantId`: The Microsoft Azure tenant ID.
+  - `clientId`: The application (client) ID from Azure.
+  - `clientSecret`: The client secret for the application.
+  - `scope`: The API scopes requested.
+  - `username`: The username of the account for authentication.
+  - `password`: The password of the account for authentication.
 
 The `msauthify.config` file should be placed as follows:
 
@@ -40,7 +41,7 @@ The `msauthify.config` file should be placed as follows:
 
 Basic usage example:
 
-    msauthify [OPTIONS]
+    msauthify [profiles]
 
 The application will authenticate using the credentials provided in `msauthify.config` and output the access token.
 
@@ -55,17 +56,39 @@ Windows: `%userprofile%/msauthify.config`
 
 ```
 {
-    "tenantId": "your-tenant-id",
-    "clientId": "your-client-id",
-    "clientSecret": "your-client-secret",
-    "scope": "your-scope-app",
-    "username": "user@example.com",
-    "password": "your-password"
+    "custom_application_name_1": {    
+        "tenantId": "app1_tenantId",
+        "clientId": "app1_clientId",
+        "clientSecret": "app1_clientSecret",
+        "scope": "app1_scope",
+        "username": "app1_user@example.com",
+        "password": "app1_password"
+    },
+    "custom_application_name_2": {    
+        "tenantId": "app2_tenantId",
+        "clientId": "app2_clientId",
+        "clientSecret": "app2_clientSecret",
+        "scope": "app2_scope",
+        "username": "app2_user@example.com",
+        "password": "app2_password"
+    },
+    ...
 }
 ```
-**Application Output:**
+**Single Application Output:**
 ```
-token...
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Inp...
+```
+**Multiple Application Output:**
+```
+----------
+Token app1
+----------
+eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Inp...
+----------
+Token app2
+----------
+ZWcyV09OcFRr5Wk94Zz09IiwiYXbiI6InVzZXJfY22NhY2N...
 ```
 
 ## # License
