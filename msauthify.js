@@ -76,5 +76,16 @@ async function fetchToken(config) {
         grant_type: "password",
     });
 
-    return (await axios.post(url, payload.toString())).data.access_token;
+    try {
+        return (await axios.post(url, payload)).data.access_token;
+    } catch (error) {
+        const data = error.response?.data;
+        if (data?.error_description || data?.error) {
+            const code = data.error ?? 'unknown_error';
+            const description = data.error_description ?? 'No description provided';
+            const correlationId = data.correlation_id ?? 'N/A';
+            throw new Error(`[${code}] ${description} (correlation_id: ${correlationId})`);
+        }
+        throw error;
+    }
 }
