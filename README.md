@@ -47,7 +47,11 @@ The application will authenticate using the credentials provided in `msauthify.c
 
 ## # Options
 
-N/A
+| Option          | Description                                       |
+| --------------- | ------------------------------------------------- |
+| `-l, --list`    | List available profiles from `msauthify.config`   |
+| `-h, --help`    | Show help                                         |
+| `-v, --version` | Show version                                      |
 
 ## # Examples
 
@@ -89,6 +93,13 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Inp...
 Token app2
 ----------
 ZWcyV09OcFRr5Wk94Zz09IiwiYXbiI6InVzZXJfY22NhY2N...
+```
+
+**List Profiles Output:**
+```
+$ msauthify --list
+custom_application_name_1
+custom_application_name_2
 ```
 
 ## # License

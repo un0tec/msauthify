@@ -1,6 +1,7 @@
 #!/usr/bin/env node --no-warnings=ExperimentalWarning
 import { readFileSync } from 'fs';
 import os from 'os';
+import { Command } from 'commander';
 import pkg from './package.json' with {type: 'json'};
 import { checkUpdate } from './update-notifier.js';
 import axios from 'axios';
@@ -16,16 +17,37 @@ const updateAvailable = await checkUpdate({
 
 if (updateAvailable) { process.exit(); }
 
-init().catch((error) => {
+const program = new Command();
+
+program
+    .name('msauthify')
+    .description(pkg.description)
+    .version(pkg.version, '-v, --version', 'Show version')
+    .helpOption('-h, --help', 'Show help')
+    .option('-l, --list', 'List available profiles from msauthify.config')
+    .argument('[profiles...]', 'Profile names defined in msauthify.config')
+    .action(async (profiles, opts) => {
+        const config = loadConfig();
+        if (opts.list) {
+            listProfiles(config);
+            return;
+        }
+        await run(profiles, config);
+    });
+
+program.parseAsync().catch((error) => {
     console.error(error.message);
     process.exit(1);
 });
 
-async function init() {
+function listProfiles(config) {
+    const profiles = Object.keys(config);
+    for (const name of profiles) {
+        console.log(name);
+    }
+}
 
-    const argv = process.argv.slice(2);
-    const config = loadConfig();
-
+async function run(argv, config) {
     validateArgs(argv, config);
 
     let profiles = argv.length > 0
@@ -49,7 +71,6 @@ async function init() {
             console.log(token);
         }
     }
-
 }
 
 function validateArgs(argv, config) {
