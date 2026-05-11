@@ -23,27 +23,24 @@ const program = new Command();
 program
     .name('msauthify')
     .description(pkg.description)
-    .usage('[options] <profiles...>')
+    .usage('[options] <profile>')
     .version(pkg.version, '-v, --version', 'Show version')
     .helpOption('-h, --help', 'Show help')
     .option('-l, --list', 'List available profiles from msauthify.config')
     .option('-d, --decode', 'Decode the JWT and output its header and payload as JSON')
-    .option('-c, --copy', 'Copy the token to the system clipboard (single profile only)')
-    .argument('[profiles...]', 'Profile names defined in msauthify.config')
+    .option('-c, --copy', 'Copy the token to the system clipboard')
+    .argument('[profile]', 'Profile name defined in msauthify.config')
     .showHelpAfterError('(use --help for more info, or --list to see available profiles)')
-    .action(async (profiles, opts) => {
+    .action(async (profile, opts) => {
         const config = loadConfig();
         if (opts.list) {
             listProfiles(config);
             return;
         }
-        if (profiles.length === 0) {
-            program.error("error: missing required argument 'profiles'");
+        if (!profile) {
+            program.error("error: missing required argument 'profile'");
         }
-        if (opts.copy && profiles.length > 1) {
-            program.error('error: --copy can only be used with a single profile');
-        }
-        await run(profiles, config, opts);
+        await run(profile, config, opts);
     });
 
 program.parseAsync().catch((error) => {
@@ -58,45 +55,26 @@ function listProfiles(config) {
     }
 }
 
-async function run(argv, config, opts) {
-    validateArgs(argv, config);
+async function run(profile, config, opts) {
+    validateProfile(profile, config);
 
-    const profiles = Object.fromEntries(
-        Object.entries(config).filter(([key]) => argv.includes(key))
-    );
-
-    let results = [];
-    for (let profile in profiles) {
-        const token = await fetchToken(config[profile]);
-        results.push({ name: profile, token: token })
-    }
+    const token = await fetchToken(config[profile]);
 
     if (opts.copy) {
-        const { name, token } = results[0];
         const payload = opts.decode
             ? JSON.stringify(decodeJwt(token), null, 2)
             : token;
         await clipboard.write(payload);
-        console.error(`Token for '${name}' copied to clipboard`);
+        console.error(`Token for '${profile}' copied to clipboard`);
         return;
     }
 
     if (opts.decode) {
-        printDecoded(results);
+        console.log(JSON.stringify(decodeJwt(token), null, 2));
         return;
     }
 
-    if (results.length === 1) {
-        console.log(results[0].token);
-    } else {
-        for (let { name, token } of results) {
-            const tokenMessage = `Token '${name}'`;
-            console.log('-'.repeat(tokenMessage.length));
-            console.log(tokenMessage);
-            console.log('-'.repeat(tokenMessage.length));
-            console.log(token);
-        }
-    }
+    console.log(token);
 }
 
 function decodeJwt(token) {
@@ -110,22 +88,9 @@ function decodeJwt(token) {
     return { header, payload };
 }
 
-function printDecoded(results) {
-    if (results.length === 1) {
-        console.log(JSON.stringify(decodeJwt(results[0].token), null, 2));
-        return;
-    }
-    const output = {};
-    for (const { name, token } of results) {
-        output[name] = decodeJwt(token);
-    }
-    console.log(JSON.stringify(output, null, 2));
-}
-
-function validateArgs(argv, config) {
-    const invalidProfiles = argv.filter(profile => !config.hasOwnProperty(profile));
-    if (invalidProfiles.length > 0) {
-        throw new Error(`Invalid config: '${invalidProfiles.join(", ")}' not found in ${CONFIG_PATH}`);
+function validateProfile(profile, config) {
+    if (!Object.prototype.hasOwnProperty.call(config, profile)) {
+        throw new Error(`Invalid config: '${profile}' not found in ${CONFIG_PATH}`);
     }
 }
 

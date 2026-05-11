@@ -14,7 +14,7 @@
 
 ## # Description
 
-`msauthify` is a Node.js application for automating OAuth2 authentication with Microsoft services. It retrieves access tokens by leveraging the resource owner password credentials grant flow. This tool simplifies authentication for developers working with Microsoft APIs. Supports multiple applications.
+`msauthify` is a Node.js application for automating OAuth2 authentication with Microsoft services. It retrieves access tokens by leveraging the resource owner password credentials grant flow. This tool simplifies authentication for developers working with Microsoft APIs.
 
 ## # Before Running
 
@@ -41,9 +41,9 @@ The `msauthify.config` file should be placed as follows:
 
 Basic usage example:
 
-    msauthify <profiles...>
+    msauthify <profile>
 
-At least one profile is required. Use `--list` to see the available profiles defined in `msauthify.config`.
+A profile is required. Use `--list` to see the available profiles defined in `msauthify.config`.
 
 The application will authenticate using the credentials provided in `msauthify.config` and output the access token.
 
@@ -53,7 +53,7 @@ The application will authenticate using the credentials provided in `msauthify.c
 | --------------- | -------------------------------------------------------------------- |
 | `-l, --list`    | List available profiles from `msauthify.config`                      |
 | `-d, --decode`  | Decode the JWT and output its header and payload as JSON             |
-| `-c, --copy`    | Copy the token to the system clipboard (single profile only)         |
+| `-c, --copy`    | Copy the token to the system clipboard                               |
 | `-h, --help`    | Show help                                                            |
 | `-v, --version` | Show version                                                         |
 
@@ -87,20 +87,10 @@ Windows: `%userprofile%/msauthify.config`
     ...
 }
 ```
-**Single Application Output:**
+**Token Output:**
 ```
+$ msauthify custom_application_name_1
 eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Inp...
-```
-**Multiple Application Output:**
-```
-----------
-Token app1
-----------
-eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Inp...
-----------
-Token app2
-----------
-ZWcyV09OcFRr5Wk94Zz09IiwiYXbiI6InVzZXJfY22NhY2N...
 ```
 
 **List Profiles Output:**
@@ -110,7 +100,7 @@ custom_application_name_1
 custom_application_name_2
 ```
 
-**Decoded JWT Output (single profile):**
+**Decoded JWT Output:**
 ```
 $ msauthify --decode custom_application_name_1
 {
@@ -125,21 +115,6 @@ $ msauthify --decode custom_application_name_1
     "exp": 1700000000,
     "scp": "...",
     ...
-  }
-}
-```
-
-**Decoded JWT Output (multiple profiles):**
-```
-$ msauthify --decode custom_application_name_1 custom_application_name_2
-{
-  "custom_application_name_1": {
-    "header": { ... },
-    "payload": { ... }
-  },
-  "custom_application_name_2": {
-    "header": { ... },
-    "payload": { ... }
   }
 }
 ```
