@@ -1,4 +1,36 @@
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
+import path from 'path';
+import os from 'os';
 import axios from 'axios';
+
+const CACHE_DIR = path.join(os.homedir(), '.cache', 'msauthify');
+const CACHE_FILE = path.join(CACHE_DIR, 'update-check.json');
+const TTL_MS = 24 * 60 * 60 * 1000;
+
+function readCache(currentVersion) {
+    try {
+        const cache = JSON.parse(readFileSync(CACHE_FILE, 'utf8'));
+        if (cache.currentVersion !== currentVersion) return null;
+        if (typeof cache.checkedAt !== 'number') return null;
+        if (Date.now() - cache.checkedAt > TTL_MS) return null;
+        return cache.latestVersion ?? null;
+    } catch {
+        return null;
+    }
+}
+
+function writeCache(currentVersion, latestVersion) {
+    try {
+        mkdirSync(CACHE_DIR, { recursive: true });
+        writeFileSync(CACHE_FILE, JSON.stringify({
+            checkedAt: Date.now(),
+            currentVersion,
+            latestVersion,
+        }));
+    } catch {
+        // silent: cache is best-effort, never break the CLI
+    }
+}
 
 async function fetchLatestRelease(pkg) {
     const url = `https://api.github.com/repos/${pkg.author}/${pkg.repository}/releases/latest`;
@@ -17,7 +49,14 @@ function logUpdate(pkg, latestVersion) {
 }
 
 export async function checkUpdate(pkg) {
-    const latestVersion = await fetchLatestRelease(pkg);
+    let latestVersion = readCache(pkg.version);
+    if (!latestVersion) {
+        latestVersion = await fetchLatestRelease(pkg);
+        if (latestVersion) {
+            writeCache(pkg.version, latestVersion);
+        }
+    }
+
     if (latestVersion && pkg.version !== latestVersion) {
         logUpdate(pkg, latestVersion);
         return true;
