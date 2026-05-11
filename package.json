@@ -1,7 +1,7 @@
 {
   "name": "msauthify",
-  "version": "1.2.0",
-  "description": "Automates AWS Oauth2 token fetching",
+  "version": "2.0.0",
+  "description": "Automates Microsoft Azure token fetching",
   "type": "module",
   "exports": "./msauthify.js",
   "bin": {
