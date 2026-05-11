@@ -49,11 +49,12 @@ The application will authenticate using the credentials provided in `msauthify.c
 
 ## # Options
 
-| Option          | Description                                       |
-| --------------- | ------------------------------------------------- |
-| `-l, --list`    | List available profiles from `msauthify.config`   |
-| `-h, --help`    | Show help                                         |
-| `-v, --version` | Show version                                      |
+| Option          | Description                                                          |
+| --------------- | -------------------------------------------------------------------- |
+| `-l, --list`    | List available profiles from `msauthify.config`                      |
+| `-d, --decode`  | Decode the JWT and output its header and payload as JSON             |
+| `-h, --help`    | Show help                                                            |
+| `-v, --version` | Show version                                                         |
 
 ## # Examples
 
@@ -102,6 +103,40 @@ ZWcyV09OcFRr5Wk94Zz09IiwiYXbiI6InVzZXJfY22NhY2N...
 $ msauthify --list
 custom_application_name_1
 custom_application_name_2
+```
+
+**Decoded JWT Output (single profile):**
+```
+$ msauthify --decode custom_application_name_1
+{
+  "header": {
+    "typ": "JWT",
+    "alg": "RS256",
+    "kid": "..."
+  },
+  "payload": {
+    "aud": "...",
+    "iss": "...",
+    "exp": 1700000000,
+    "scp": "...",
+    ...
+  }
+}
+```
+
+**Decoded JWT Output (multiple profiles):**
+```
+$ msauthify --decode custom_application_name_1 custom_application_name_2
+{
+  "custom_application_name_1": {
+    "header": { ... },
+    "payload": { ... }
+  },
+  "custom_application_name_2": {
+    "header": { ... },
+    "payload": { ... }
+  }
+}
 ```
 
 ## # License

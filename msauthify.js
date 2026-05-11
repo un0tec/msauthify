@@ -26,6 +26,7 @@ program
     .version(pkg.version, '-v, --version', 'Show version')
     .helpOption('-h, --help', 'Show help')
     .option('-l, --list', 'List available profiles from msauthify.config')
+    .option('-d, --decode', 'Decode the JWT and output its header and payload as JSON')
     .argument('[profiles...]', 'Profile names defined in msauthify.config')
     .showHelpAfterError('(use --help for more info, or --list to see available profiles)')
     .action(async (profiles, opts) => {
@@ -37,7 +38,7 @@ program
         if (profiles.length === 0) {
             program.error("error: missing required argument 'profiles'");
         }
-        await run(profiles, config);
+        await run(profiles, config, opts);
     });
 
 program.parseAsync().catch((error) => {
@@ -52,7 +53,7 @@ function listProfiles(config) {
     }
 }
 
-async function run(argv, config) {
+async function run(argv, config, opts) {
     validateArgs(argv, config);
 
     const profiles = Object.fromEntries(
@@ -63,6 +64,11 @@ async function run(argv, config) {
     for (let profile in profiles) {
         const token = await fetchToken(config[profile]);
         results.push({ name: profile, token: token })
+    }
+
+    if (opts.decode) {
+        printDecoded(results);
+        return;
     }
 
     if (results.length === 1) {
@@ -76,6 +82,29 @@ async function run(argv, config) {
             console.log(token);
         }
     }
+}
+
+function decodeJwt(token) {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+        throw new Error('Invalid JWT: expected 3 dot-separated segments');
+    }
+    const [headerB64, payloadB64] = parts;
+    const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf8'));
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    return { header, payload };
+}
+
+function printDecoded(results) {
+    if (results.length === 1) {
+        console.log(JSON.stringify(decodeJwt(results[0].token), null, 2));
+        return;
+    }
+    const output = {};
+    for (const { name, token } of results) {
+        output[name] = decodeJwt(token);
+    }
+    console.log(JSON.stringify(output, null, 2));
 }
 
 function validateArgs(argv, config) {
