@@ -22,15 +22,20 @@ const program = new Command();
 program
     .name('msauthify')
     .description(pkg.description)
+    .usage('[options] <profiles...>')
     .version(pkg.version, '-v, --version', 'Show version')
     .helpOption('-h, --help', 'Show help')
     .option('-l, --list', 'List available profiles from msauthify.config')
     .argument('[profiles...]', 'Profile names defined in msauthify.config')
+    .showHelpAfterError('(use --help for more info, or --list to see available profiles)')
     .action(async (profiles, opts) => {
         const config = loadConfig();
         if (opts.list) {
             listProfiles(config);
             return;
+        }
+        if (profiles.length === 0) {
+            program.error("error: missing required argument 'profiles'");
         }
         await run(profiles, config);
     });
@@ -50,9 +55,9 @@ function listProfiles(config) {
 async function run(argv, config) {
     validateArgs(argv, config);
 
-    let profiles = argv.length > 0
-        ? Object.fromEntries(Object.entries(config).filter(([key]) => argv.includes(key)))
-        : config;
+    const profiles = Object.fromEntries(
+        Object.entries(config).filter(([key]) => argv.includes(key))
+    );
 
     let results = [];
     for (let profile in profiles) {

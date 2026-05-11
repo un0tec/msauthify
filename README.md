@@ -41,7 +41,9 @@ The `msauthify.config` file should be placed as follows:
 
 Basic usage example:
 
-    msauthify [profiles]
+    msauthify <profiles...>
+
+At least one profile is required. Use `--list` to see the available profiles defined in `msauthify.config`.
 
 The application will authenticate using the credentials provided in `msauthify.config` and output the access token.
 
