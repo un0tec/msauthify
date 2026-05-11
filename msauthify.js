@@ -2,6 +2,7 @@
 import { readFileSync } from 'fs';
 import os from 'os';
 import { Command } from 'commander';
+import clipboard from 'clipboardy';
 import pkg from './package.json' with {type: 'json'};
 import { checkUpdate } from './update-notifier.js';
 import axios from 'axios';
@@ -27,6 +28,7 @@ program
     .helpOption('-h, --help', 'Show help')
     .option('-l, --list', 'List available profiles from msauthify.config')
     .option('-d, --decode', 'Decode the JWT and output its header and payload as JSON')
+    .option('-c, --copy', 'Copy the token to the system clipboard (single profile only)')
     .argument('[profiles...]', 'Profile names defined in msauthify.config')
     .showHelpAfterError('(use --help for more info, or --list to see available profiles)')
     .action(async (profiles, opts) => {
@@ -37,6 +39,9 @@ program
         }
         if (profiles.length === 0) {
             program.error("error: missing required argument 'profiles'");
+        }
+        if (opts.copy && profiles.length > 1) {
+            program.error('error: --copy can only be used with a single profile');
         }
         await run(profiles, config, opts);
     });
@@ -64,6 +69,16 @@ async function run(argv, config, opts) {
     for (let profile in profiles) {
         const token = await fetchToken(config[profile]);
         results.push({ name: profile, token: token })
+    }
+
+    if (opts.copy) {
+        const { name, token } = results[0];
+        const payload = opts.decode
+            ? JSON.stringify(decodeJwt(token), null, 2)
+            : token;
+        await clipboard.write(payload);
+        console.error(`Token for '${name}' copied to clipboard`);
+        return;
     }
 
     if (opts.decode) {

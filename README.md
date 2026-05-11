@@ -53,8 +53,13 @@ The application will authenticate using the credentials provided in `msauthify.c
 | --------------- | -------------------------------------------------------------------- |
 | `-l, --list`    | List available profiles from `msauthify.config`                      |
 | `-d, --decode`  | Decode the JWT and output its header and payload as JSON             |
+| `-c, --copy`    | Copy the token to the system clipboard (single profile only)         |
 | `-h, --help`    | Show help                                                            |
 | `-v, --version` | Show version                                                         |
+
+> `--copy` works on macOS, Windows and Linux out of the box (powered by [`clipboardy`](https://www.npmjs.com/package/clipboardy)).
+>
+> Combine `--copy` with `--decode` to copy the decoded JWT (as JSON) instead of the raw token.
 
 ## # Examples
 
@@ -137,6 +142,12 @@ $ msauthify --decode custom_application_name_1 custom_application_name_2
     "payload": { ... }
   }
 }
+```
+
+**Copy Token to Clipboard:**
+```
+$ msauthify --copy custom_application_name_1
+Token for 'custom_application_name_1' copied to clipboard
 ```
 
 ## # License
