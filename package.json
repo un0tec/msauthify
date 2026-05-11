@@ -1,6 +1,6 @@
 {
   "name": "msauthify",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Automates Microsoft Azure token fetching",
   "type": "module",
   "exports": "./msauthify.js",
